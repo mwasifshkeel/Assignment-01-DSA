@@ -1,0 +1,8 @@
+# Ignore the .vscode folder
+.vscode/
+
+# Ignore all .exe files
+*.exe
+
+# Ignore all .env files
+*.env
