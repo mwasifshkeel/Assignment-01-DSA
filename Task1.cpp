@@ -1,13 +1,14 @@
 #include <iostream>
 #include <random>
+#include <string>
 
 using namespace std;
 
 class process {
 public:
   int process_id;
-  float execution_time;
-  float remaining_time;
+  int execution_time;
+  int remaining_time;
   process *next;
 };
 
@@ -17,23 +18,29 @@ public:
   int length = 0;
   process *loc = nullptr;
   process *ploc = nullptr;
-  const int CPU_TIME = 10;
+  const static int CPU_TIME = 10;
 
   bool isEmpty() { return length == 0; }
 
   void PrintList() {
     if (!isEmpty()) {
       process *temp = list->next;
+
+      bool isFirst = true;
       do {
-        cout << "Process ID: " << temp->process_id << " "
-             << "Execution Time : " << temp->execution_time << " "
-             << " Remaining Time : " << temp->remaining_time << " ";
+        if (!isFirst) {
+          cout << ", ";
+        }
+        cout << "P" << temp->process_id << " "
+             << (temp->remaining_time <= CPU_TIME
+                     ? "(Completes)"
+                     : "(Remaining: " + to_string(temp->remaining_time) + ")");
         temp = temp->next;
-        cout << endl;
+        isFirst = false;
       } while (temp != list->next);
       cout << endl;
     } else {
-      cout << "List is Empty" << endl;
+      cout << "No More Processes" << endl;
     }
   }
 
@@ -62,7 +69,7 @@ public:
   void InsertAtEnd(int pid) {
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_int_distribution<int> dist(1, 100);
+    std::uniform_int_distribution<int> dist(10, 100);
     process *newprocess = new process();
     newprocess->process_id = pid;
     newprocess->execution_time = dist(mt);
@@ -81,7 +88,6 @@ public:
   void Delete(int pid) {
     Search(pid);
     if (loc != nullptr) {
-      cout << "Deleting Process: " << pid << endl;
       if (list->next != list) {
         ploc->next = loc->next;
         if (loc == list) {
@@ -111,15 +117,47 @@ public:
     }
   }
 
-  void executeProcesses() { process *temp = list; }
+  void executeProcesses() {
+    process *current;
+    int cycle = 1;
+
+    while (!isEmpty()) {
+      current = list->next;
+      while (!isEmpty() && current != list) {
+        current->remaining_time -= CPU_TIME;
+
+        if (current->remaining_time <= 0) {
+          int pid = current->process_id;
+          current = current->next;
+          Delete(pid);
+        } else {
+          current = current->next;
+        }
+      }
+      current->remaining_time -= CPU_TIME;
+
+      if (current->remaining_time <= 0) {
+        int pid = current->process_id;
+        Delete(pid);
+      }
+
+      cout << "Cycle " << cycle << ": ";
+      PrintList();
+      cycle++;
+    }
+  }
 };
 
 int main() {
   CircularLinkedList test;
-  test.PrintList();
   test.InsertAtEnd(1);
   test.InsertAtEnd(2);
   test.InsertAtEnd(3);
   test.InsertAtEnd(4);
+  cout << "Initial Processes: ";
   test.PrintList();
+  cout << "CPU Time per Process per Cycle: " << CircularLinkedList::CPU_TIME
+       << endl;
+  test.executeProcesses();
+  test.DestroyList();
 }
