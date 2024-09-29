@@ -1,4 +1,6 @@
 #include <iostream>
+#include <random>
+
 using namespace std;
 
 class process {
@@ -15,6 +17,7 @@ public:
   int length = 0;
   process *loc = nullptr;
   process *ploc = nullptr;
+  const int CPU_TIME = 10;
 
   bool isEmpty() { return length == 0; }
 
@@ -26,6 +29,7 @@ public:
              << "Execution Time : " << temp->execution_time << " "
              << " Remaining Time : " << temp->remaining_time << " ";
         temp = temp->next;
+        cout << endl;
       } while (temp != list->next);
       cout << endl;
     } else {
@@ -56,8 +60,13 @@ public:
   }
 
   void InsertAtEnd(int pid) {
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dist(1, 100);
     process *newprocess = new process();
     newprocess->process_id = pid;
+    newprocess->execution_time = dist(mt);
+    newprocess->remaining_time = newprocess->execution_time;
     if (isEmpty()) {
       newprocess->next = newprocess;
       list = newprocess;
@@ -101,11 +110,16 @@ public:
       list = nullptr;
     }
   }
+
+  void executeProcesses() { process *temp = list; }
 };
 
 int main() {
   CircularLinkedList test;
   test.PrintList();
   test.InsertAtEnd(1);
+  test.InsertAtEnd(2);
+  test.InsertAtEnd(3);
+  test.InsertAtEnd(4);
   test.PrintList();
 }
