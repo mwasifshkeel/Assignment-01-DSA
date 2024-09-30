@@ -143,6 +143,12 @@ public:
 
       cout << "Cycle " << cycle << ": ";
       PrintList();
+      if (cycle == 2) {
+        InsertAtEnd(5);
+        cout << "New process arrives: P" << list->process_id
+             << " (Remaining: " << list->remaining_time << ")" << endl;
+      }
+
       cycle++;
     }
   }
