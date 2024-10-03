@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <iostream>
 #include <string>
+
 using namespace std;
 
 class node {
@@ -56,12 +58,14 @@ public:
     if (first == nullptr) {
       first = newNode;
       last = newNode;
+      numItems++;
       return;
     }
 
     last->next = newNode;
     newNode->prev = last;
     last = newNode;
+    numItems++;
   }
 
   void Delete(string value) {
@@ -101,6 +105,59 @@ public:
     delete temp;
     first = nullptr;
     last = nullptr;
+  }
+
+  friend Number operator+(const Number &n1, const Number &n2) {
+    Number result;
+    node *tempOne = n1.last;
+    node *tempTwo = n2.last;
+    int carry = 0;
+
+    while (tempOne != nullptr || tempTwo != nullptr || carry > 0) {
+      string partOne = (tempOne != nullptr) ? tempOne->data : "0";
+      string partTwo = (tempTwo != nullptr) ? tempTwo->data : "0";
+
+      string sumNode;
+      int maxLength = max(partOne.size(), partTwo.size());
+
+      partOne.insert(0, maxLength - partOne.size(), '0');
+      partTwo.insert(0, maxLength - partTwo.size(), '0');
+
+      for (int i = maxLength - 1; i >= 0; --i) {
+        int digitOne = partOne[i] - '0';
+        int digitTwo = partTwo[i] - '0';
+        int digitSum = digitOne + digitTwo + carry;
+        carry = digitSum / 10;
+        sumNode.push_back((digitSum % 10) + '0');
+      }
+
+      if (carry > 0) {
+        sumNode.push_back(carry + '0');
+      }
+
+      reverse(sumNode.begin(), sumNode.end());
+
+      node *newNode = new node();
+      newNode->data = sumNode;
+
+      if (result.first == nullptr) {
+        result.first = newNode;
+        result.last = newNode;
+      } else {
+        newNode->next = result.first;
+        result.first->prev = newNode;
+        result.first = newNode;
+      }
+
+      result.numItems++;
+
+      if (tempOne != nullptr)
+        tempOne = tempOne->prev;
+      if (tempTwo != nullptr)
+        tempTwo = tempTwo->prev;
+    }
+
+    return result;
   }
 };
 
@@ -147,11 +204,20 @@ void storeNumber(Number *n, string num) {
 
 int main() {
   string num = getNumber();
+  string num2 = getNumber();
+
   Number n1;
+  Number n2;
+  Number n3;
 
   storeNumber(&n1, num);
+  storeNumber(&n2, num2);
 
   n1.PrintList();
+  n2.PrintList();
+
+  n3 = n1 + n2;
+  n3.PrintList();
 
   return 0;
 }
