@@ -173,19 +173,7 @@ public:
 
       reverse(sumNode.begin(), sumNode.end());
 
-      node *newNode = new node();
-      newNode->data = sumNode;
-
-      if (result.first == nullptr) {
-        result.first = newNode;
-        result.last = newNode;
-      } else {
-        newNode->next = result.first;
-        result.first->prev = newNode;
-        result.first = newNode;
-      }
-
-      result.numItems++;
+      result.InsertAtFront(sumNode);
 
       if (tempOne != nullptr)
         tempOne = tempOne->prev;
@@ -232,6 +220,60 @@ public:
       result.InsertAtFront(sumNode);
     }
 
+    return result;
+  }
+
+  friend Number operator*(const Number &n1, const Number &n2) {
+    Number result;
+    Number *temp = new Number[n2.length];
+    node *tempTwo = n2.last;
+    int z = 0;
+
+    while (tempTwo != nullptr) {
+      node *tempOne = n1.last;
+      int carry = 0;
+      string productNode = "";
+
+      string partTwo = tempTwo->data;
+      productNode = "";
+      for (int i = partTwo.size() - 1; i >= 0; --i) {
+        productNode = "";
+        carry = 0;
+        tempOne = n1.last;
+        while (tempOne != nullptr) {
+          string partOne = tempOne->data;
+          for (int j = partOne.size() - 1; j >= 0; --j) {
+            int digitOne = partOne[j] - '0';
+            int digitTwo = partTwo[i] - '0';
+            int digitProduct = digitOne * digitTwo + carry;
+            carry = digitProduct / 10;
+            productNode.push_back((digitProduct % 10) + '0');
+          }
+          tempOne = tempOne->prev;
+        }
+        if (carry > 0) {
+          productNode.push_back(carry + '0');
+        }
+
+        reverse(productNode.begin(), productNode.end());
+        if (z > 0) {
+          int temp = z;
+          while (temp > 0) {
+            productNode.push_back('0');
+            temp--;
+          }
+        }
+        temp[z].InsertAtEnd(productNode);
+        z++;
+      }
+
+      tempTwo = tempTwo->prev;
+    }
+    result = temp[0];
+    for (int i = 1; i < n2.length; i++) {
+      result = result + temp[i];
+    }
+    delete[] temp;
     return result;
   }
 
@@ -448,7 +490,7 @@ int main() {
   n1.PrintList();
   n2.PrintList();
 
-  n3 = n1 - n2;
+  n3 = n1 * n2;
   n3.PrintList();
   return 0;
 }
