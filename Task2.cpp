@@ -372,7 +372,7 @@ public:
   }
 
   friend bool operator==(const Number &n1, const Number &n2) {
-    if (n1.GetNumber() == n2.GetNumber()) {
+    if (stoi(n1.GetNumber()) == stoi(n2.GetNumber())) {
       return true;
     }
     return false;
@@ -390,6 +390,26 @@ public:
       return true;
     }
     if (n1.length > n2.length) {
+      string num = n1.GetNumber();
+      string numTwo = n2.GetNumber();
+      for (int i = 0; i < n1.length - n2.length; i++) {
+        if (num.at(i) != '0') {
+          return false;
+        }
+      }
+
+      string tempstr;
+      for (int i = n1.length - 1; i >= n1.length - n2.length; --i) {
+        tempstr += num.at(i);
+      }
+      reverse(tempstr.begin(), tempstr.end());
+      while (!tempstr.empty()) {
+        if (int(tempstr.front()) < int(numTwo.front())) {
+          return true;
+        }
+        tempstr = tempstr.substr(1, tempstr.length());
+        numTwo = numTwo.substr(1, n2.length);
+      }
       return false;
     }
     node *temp = n1.first;
@@ -416,6 +436,24 @@ public:
       return true;
     }
     if (n1.length > n.length()) {
+      string num = n1.GetNumber();
+      for (int i = 0; i < n1.length - n.length(); i++) {
+        if (num.at(i) != '0') {
+          return false;
+        }
+      }
+      string tempstr;
+      for (int i = n1.length - 1; i >= n1.length - n.length(); --i) {
+        tempstr += num.at(i);
+      }
+      reverse(tempstr.begin(), tempstr.end());
+      while (!tempstr.empty()) {
+        if (int(tempstr.front()) < int(n.front())) {
+          return true;
+        }
+        tempstr = tempstr.substr(1, tempstr.length());
+        n = n.substr(1, n.length());
+      }
       return false;
     }
     node *temp = n1.first;
@@ -431,6 +469,29 @@ public:
       temp = temp->next;
     }
     return false;
+  }
+
+  friend Number operator%(Number &n1, Number &n2) {
+    while (!(n1 < n2)) {
+      n1 = n1 - n2;
+    }
+    return n1;
+  }
+
+  friend Number operator%(Number &n1, int &n2) {
+    int res = 0;
+    string num = n1.GetNumber();
+    for (int i = 0; i < num.length(); i++) {
+      res = (res * 10 + num[i] - '0') % n2;
+    }
+    //   while (!(n1 < n2)) {
+    //     n1 = n1 - n2;
+    //   }
+    //   return n1;
+    // }
+    Number result;
+    result.InsertAtEnd(to_string(res));
+    return result;
   }
 };
 
@@ -489,8 +550,7 @@ int main() {
 
   n1.PrintList();
   n2.PrintList();
-
-  n3 = n1 * n2;
+  n3 = n1 % n2;
   n3.PrintList();
   return 0;
 }
