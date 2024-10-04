@@ -15,11 +15,12 @@ class Number {
 public:
   node *first = nullptr;
   node *last = nullptr;
-  int numItems;
+  int numItems = 0;
   node *Loc_ = nullptr;
   node *PLoc_ = nullptr;
+  int length = 0;
 
-  bool isEmpty() { return first == nullptr; }
+  bool isEmpty() const { return first == nullptr; }
 
   void PrintList() {
     if (!isEmpty()) {
@@ -33,6 +34,20 @@ public:
     } else {
       cout << "Number is empty" << endl;
     }
+  }
+
+  string GetNumber() const {
+    string num = "";
+    if (!isEmpty()) {
+      node *temp;
+      temp = first;
+      while (temp != nullptr) {
+        num += temp->data;
+        temp = temp->next;
+      }
+      return num;
+    }
+    return "";
   }
 
   void Search(string key) {
@@ -51,6 +66,25 @@ public:
     }
   }
 
+  void InsertAtFront(string value) {
+    node *newNode = new node();
+    newNode->data = value;
+
+    if (first == nullptr) {
+      first = newNode;
+      last = newNode;
+      numItems++;
+      length += value.length();
+      return;
+    }
+
+    first->prev = newNode;
+    newNode->next = first;
+    first = newNode;
+    numItems++;
+    length += value.length();
+  }
+
   void InsertAtEnd(string value) {
     node *newNode = new node();
     newNode->data = value;
@@ -59,6 +93,7 @@ public:
       first = newNode;
       last = newNode;
       numItems++;
+      length += value.length();
       return;
     }
 
@@ -66,6 +101,7 @@ public:
     newNode->prev = last;
     last = newNode;
     numItems++;
+    length += value.length();
   }
 
   void Delete(string value) {
@@ -113,7 +149,7 @@ public:
     node *tempTwo = n2.last;
     int carry = 0;
 
-    while (tempOne != nullptr || tempTwo != nullptr || carry > 0) {
+    while (tempOne != nullptr || tempTwo != nullptr) {
       string partOne = (tempOne != nullptr) ? tempOne->data : "0";
       string partTwo = (tempTwo != nullptr) ? tempTwo->data : "0";
 
@@ -159,6 +195,115 @@ public:
 
     return result;
   }
+
+  friend Number operator+(const Number &n1, const int &n2) {
+    Number result;
+    node *tempOne = n1.last;
+    int carry = n2;
+
+    while (tempOne != nullptr) {
+      string partOne = (tempOne != nullptr) ? tempOne->data : "0";
+      string sumNode;
+
+      while (!partOne.empty()) {
+        int digitOne = (partOne.size() > 0) ? partOne.back() - '0' : 0;
+        int digitSum = digitOne + carry;
+
+        carry = digitSum / 10;
+        sumNode.push_back((digitSum % 10) + '0');
+
+        partOne.pop_back();
+      }
+
+      reverse(sumNode.begin(), sumNode.end());
+
+      tempOne = tempOne->prev;
+
+      result.InsertAtFront(sumNode);
+    }
+
+    if (carry > 0) {
+      string sumNode = "";
+      sumNode.push_back(carry);
+
+      node *newNode = new node();
+      newNode->data = sumNode;
+
+      result.InsertAtFront(sumNode);
+    }
+
+    return result;
+  }
+
+  friend Number operator*(const Number &n1, int n2) {
+    Number result = n1;
+    for (int i = 0; i < n2 - 1; i++) {
+      result = result + n1;
+    }
+    return result;
+  }
+
+  friend bool operator==(const Number &n1, const Number &n2) {
+    if (n1.GetNumber() == n2.GetNumber()) {
+      return true;
+    }
+    return false;
+  }
+
+  friend bool operator==(const Number &n1, int &n2) {
+    if (n1.GetNumber() == to_string(n2)) {
+      return true;
+    }
+    return false;
+  }
+
+  friend bool operator<(const Number &n1, const Number &n2) {
+    if (n1.length < n2.length) {
+      return true;
+    }
+    if (n1.length > n2.length) {
+      return false;
+    }
+    node *temp = n1.first;
+    node *tempTwo = n2.first;
+    while (temp != nullptr) {
+      string data = temp->data;
+      string dataTwo = tempTwo->data;
+      while (!data.empty()) {
+        if (int(data.front()) < int(dataTwo.front())) {
+          return true;
+        }
+        data = data.substr(1, data.length());
+        dataTwo = dataTwo.substr(1, dataTwo.length());
+      }
+      temp = temp->next;
+      tempTwo = tempTwo->next;
+    }
+    return false;
+  }
+
+  friend bool operator<(const Number &n1, int &n2) {
+    string n = to_string(n2);
+    if (n1.length < n.length()) {
+      return true;
+    }
+    if (n1.length > n.length()) {
+      return false;
+    }
+    node *temp = n1.first;
+    while (temp != nullptr) {
+      string data = temp->data;
+      while (!data.empty()) {
+        if (int(data.front()) < int(n.front())) {
+          return true;
+        }
+        data = data.substr(1, data.length());
+        n = n.substr(1, n.length());
+      }
+      temp = temp->next;
+    }
+    return false;
+  }
 };
 
 bool correctString(string temp) {
@@ -190,8 +335,9 @@ string getNumber() {
 }
 
 void storeNumber(Number *n, string num) {
-  if (num.length() < 9) {
+  if (num.length() <= 9) {
     (*n).InsertAtEnd(num.substr(0, num.length()));
+    return;
   } else {
     for (int i = 0; i < num.length() - (num.length() % 9); i += 9) {
       (*n).InsertAtEnd(num.substr(i, 9));
@@ -215,9 +361,6 @@ int main() {
 
   n1.PrintList();
   n2.PrintList();
-
-  n3 = n1 + n2;
-  n3.PrintList();
 
   return 0;
 }
