@@ -196,7 +196,7 @@ public:
     return result;
   }
 
-  friend Number operator+(const Number &n1, const int &n2) {
+  friend Number operator+(const Number &n1, const int n2) {
     Number result;
     node *tempOne = n1.last;
     int carry = n2;
@@ -239,6 +239,92 @@ public:
     Number result = n1;
     for (int i = 0; i < n2 - 1; i++) {
       result = result + n1;
+    }
+    return result;
+  }
+
+  friend Number operator-(const Number &n1, const Number &n2) {
+    Number result;
+    node *temp = n1.last;
+    node *tempTwo = n2.last;
+    int borrow = 0;
+    string diffNode = "";
+    while (temp != nullptr && tempTwo != nullptr) {
+      string value = temp->data;
+      string valueTwo = tempTwo->data;
+
+      diffNode = "";
+      while ((!value.empty()) && (!valueTwo.empty())) {
+        int digitOne = int(value.back() - '0') - borrow;
+        int digitTwo = int(valueTwo.back() - '0');
+        int digitDiff;
+
+        if (digitOne >= digitTwo) {
+          digitDiff = digitOne - digitTwo;
+          borrow = 0;
+        } else {
+          digitDiff = digitOne + 10 - digitTwo;
+          borrow = 1;
+        }
+        diffNode.push_back(digitDiff + '0');
+        value.pop_back();
+        valueTwo.pop_back();
+      }
+      temp = temp->prev;
+      tempTwo = tempTwo->prev;
+      if (tempTwo == nullptr && !value.empty()) {
+        while (!value.empty()) {
+          diffNode.push_back(value.back());
+          value.pop_back();
+        }
+      }
+      reverse(diffNode.begin(), diffNode.end());
+      result.InsertAtFront(diffNode);
+    }
+    if (tempTwo == nullptr) {
+      while (temp != nullptr) {
+        result.InsertAtFront(temp->data);
+        temp = temp->prev;
+      }
+    }
+    return result;
+  }
+
+  friend Number operator-(const Number &n1, int n2) {
+    Number result;
+    node *temp = n1.last;
+    string n_temp = to_string(n2);
+    int len = n_temp.length();
+    int padding = n1.length - len;
+    string n = "";
+    for (int i = 0; i < padding; i++) {
+      n.push_back('0');
+    }
+    n += n_temp;
+    int borrow = 0;
+    string diffNode = "";
+    while (temp != nullptr) {
+      string value = temp->data;
+      diffNode = "";
+      while ((!value.empty()) && (!n.empty())) {
+        int digitOne = int(value.back() - '0') - borrow;
+        int digitTwo = int(n.back() - '0');
+        int digitDiff;
+
+        if (digitOne >= digitTwo) {
+          digitDiff = digitOne - digitTwo;
+          borrow = 0;
+        } else {
+          digitDiff = digitOne + 10 - digitTwo;
+          borrow = 1;
+        }
+        diffNode.push_back(digitDiff + '0');
+        value.pop_back();
+        n.pop_back();
+      }
+      temp = temp->prev;
+      reverse(diffNode.begin(), diffNode.end());
+      result.InsertAtFront(diffNode);
     }
     return result;
   }
@@ -362,5 +448,7 @@ int main() {
   n1.PrintList();
   n2.PrintList();
 
+  n3 = n1 - n2;
+  n3.PrintList();
   return 0;
 }
