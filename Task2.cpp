@@ -6,6 +6,10 @@
 
 using namespace std;
 
+random_device rd;
+std::mt19937 eng(rd());
+std::uniform_int_distribution<> distr(0, 100000);
+
 class Number;
 
 void storeNumber(Number *n, string num);
@@ -715,6 +719,19 @@ public:
 
   friend Number operator%(const Number &n1, const Number &n2)
   {
+    int z = 0;
+    if (n1 == z)
+    {
+      Number z2;
+      z2.InsertAtEnd("0");
+      return z2;
+    }
+
+    if (n1 < n2)
+    {
+      return n1;
+    }
+
     string numOne = n1.GetNumber();
     string numTwo = n2.GetNumber();
     size_t TrimIndexNumOne = numOne.find_first_not_of('0');
@@ -769,10 +786,19 @@ public:
           while (nOne < nTwo)
           {
             quotientNode.push_back('0');
-            data = data + numOne.substr(0 + i, 1);
-            i++;
-            nOne.DestroyList();
-            storeNumber(&nOne, data);
+            if (numOne.length() >= i)
+            {
+              data = data + numOne.substr(0 + i, 1);
+              i++;
+              nOne.DestroyList();
+              storeNumber(&nOne, data);
+            }
+            else
+            {
+              numOne = "";
+              remainder = data;
+              goto nomore;
+            }
           }
         }
       }
@@ -796,6 +822,7 @@ public:
       nOne = clean(nOne);
       remainder = (nOne == zero) ? "" : nOne.GetNumber();
     }
+  nomore:
     Number result;
     storeNumber(&result, remainder);
     return result;
@@ -862,6 +889,21 @@ public:
 
   friend Number operator/(const Number &n1, const Number &n2)
   {
+    int z = 0;
+    if (n1 == z)
+    {
+      Number z2;
+      z2.InsertAtEnd("0");
+      return z2;
+    }
+
+    if (n1 < n2)
+    {
+      Number z2;
+      z2.InsertAtEnd("0");
+      return z2;
+    }
+
     string numOne = n1.GetNumber();
     string numTwo = n2.GetNumber();
     size_t TrimIndexNumOne = numOne.find_first_not_of('0');
@@ -905,24 +947,45 @@ public:
         data = remainder;
       }
       Number nOne;
+      bool digitRequestFirstTime = false;
       storeNumber(&nOne, data);
       int i = 0;
       if (nOne < nTwo)
       {
         i = 1;
-        data = data + numOne.substr(0, 1);
-        nOne.DestroyList();
-        storeNumber(&nOne, data);
+        if (!firstTime)
+        {
+          data = data + numOne.substr(0, 1);
+          nOne.DestroyList();
+          storeNumber(&nOne, data);
+        }
+        else
+        {
+          data = data + numOne.substr(lenTwo, 1);
+          nOne.DestroyList();
+          storeNumber(&nOne, data);
+          digitRequestFirstTime = true;
+        }
+
         if (nOne < nTwo)
         {
           i = 1;
           while (nOne < nTwo)
           {
             quotientNode.push_back('0');
-            data = data + numOne.substr(0 + i, 1);
-            i++;
-            nOne.DestroyList();
-            storeNumber(&nOne, data);
+            if (numOne.length() >= i)
+            {
+              data = data + numOne.substr(0 + i, 1);
+              i++;
+              nOne.DestroyList();
+              storeNumber(&nOne, data);
+            }
+            else
+            {
+              numOne = "";
+              remainder = data;
+              goto nomore2;
+            }
           }
         }
       }
@@ -936,7 +999,21 @@ public:
       quotientNode = quotientNode + to_string(multiple);
       if (firstTime)
       {
-        numOne = numOne.substr(lenTwo, numOne.length());
+        if (!digitRequestFirstTime)
+        {
+          numOne = numOne.substr(lenTwo, numOne.length());
+        }
+        else
+        {
+          if (numOne.length() == lenTwo + i)
+          {
+            numOne = "";
+          }
+          else
+          {
+            numOne = numOne.substr(lenTwo + i, numOne.length());
+          }
+        }
       }
       else
       {
@@ -946,6 +1023,8 @@ public:
       nOne = clean(nOne);
       remainder = (nOne == zero) ? "" : nOne.GetNumber();
     }
+  nomore2:
+
     Number result;
     storeNumber(&result, quotientNode);
     return result;
@@ -953,37 +1032,11 @@ public:
 
   friend Number operator/(const Number &n1, const int &n2)
   {
-    if (n2 < 2 || n2 > 9)
-    {
-      throw invalid_argument("Divider must be between 2 and 9.");
-    }
+    Number n2T;
+    string n2I = to_string(n2);
+    storeNumber(&n2T, n2I);
 
-    Number result;
-    Number temp;
-    node *currentNode = n1.first;
-    int carry = 0;
-
-    while (currentNode != nullptr)
-    {
-      string currentData = currentNode->data;
-      for (char digit : currentData)
-      {
-        int currentDigit = carry * 10 + (digit - '0');
-        int quotient = currentDigit / n2;
-        carry = currentDigit % n2;
-
-        if (!result.isEmpty() || quotient > 0)
-        {
-          result.InsertAtEnd(to_string(quotient));
-        }
-      }
-      currentNode = currentNode->next;
-    }
-
-    if (result.isEmpty())
-    {
-      result.InsertAtEnd("0");
-    }
+    Number result = n1 / n2T;
 
     return result;
   }
@@ -1016,25 +1069,6 @@ public:
   }
 };
 
-Number modmultiplication(Number a, Number b, Number mod)
-{ // Compute a*b % mod
-  Number result;
-  result.InsertAtEnd("0");
-  int zero = 0;
-  int one = 1;
-  int two = 2;
-  while (!(b == zero || b < zero))
-  {
-    if ((b % two) == one)
-    {
-      result = (result + a) % mod;
-    }
-    a = (a + a) % mod;
-    b = b / 2;
-  }
-  return result;
-}
-
 Number modpow(Number a, Number b, Number mod)
 { // Compute a^b % mod
   Number result;
@@ -1042,56 +1076,84 @@ Number modpow(Number a, Number b, Number mod)
   int zero = 0;
   int one = 1;
   int two = 2;
-  while (!(b == zero || b < zero))
+  a = a % mod;
+
+  while (!(b < zero || b == zero))
   {
-    if (b % two == one)
+    if ((int(b.GetNumber().back() - '0') % 2) == 1)
     {
-      result = modmultiplication(result, a, mod);
+      Number temp2 = result * a;
+      result = (temp2) % mod;
     }
-    a = modmultiplication(a, a, mod);
+
     b = b / 2;
+    Number temp = a * a;
+    a = (temp % mod);
   }
   return result;
 }
 
-bool primalityTest(Number n, int numTests = 20)
-{ // Assumes n is an odd integer larger than 3
-  static std::mt19937_64 randgen(0);
-  int zero = 0;
+bool millerRabin(Number d, Number n)
+{
   int one = 1;
-  int two = 2;
-  Number d = n - 1;
-  Number s;
-  s.InsertAtEnd("0");
-  while ((d % two) == zero)
+  Number two;
+  two.InsertAtEnd("2");
+  Number rand;
+  rand.InsertAtEnd(to_string(distr(eng)));
+  Number temp2 = n - 4;
+  Number temp = (rand % temp2);
+  Number a = two + temp;
+  Number x = modpow(a, d, n);
+
+  if ((x == one) || (x == (n - 1)))
   {
-    s = s + 1;
-    d = d / 2;
+    return true;
+  }
+  while (!(d == (n - 1)))
+  {
+    x = (x * x) % n;
+    d = d * 2;
+    if (x == one)
+    {
+      return false;
+    }
+    if (x == (n - 1))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool isPrime(Number n, int k)
+{
+  int four = 4;
+  int one = 1;
+  int three = 3;
+  if (((n < one) || (n == one)) || (n == four))
+  {
+    return false;
+  }
+  if (n < three || n == three)
+  {
+    return true;
   }
 
-  for (int test = 0; test < numTests; test++)
+  Number d = n - 1;
+  while ((int(d.GetNumber().back() - '0') % 2) == 0)
   {
-    Number rand;
-    string rnd = to_string(randgen());
-    storeNumber(&rand, rnd);
-    Number a = rand % (n - 3) + 2;
-    Number x = modpow(a, d, n);
+    d = (d / 2);
+  }
 
-    for (int i = 0; !(s < i || s == i); i++)
-    {
-      Number y = modmultiplication(x, x, n);
-      if (y == one && !(x == one) && !(x == n - 1))
-      {               // Nontrivial square root of 1 modulo n
-        return false; // (x+1)(x-1) divisible by n, meaning gcd(x+1, n) is a factor of n, negating primality
-      }
-      x = y;
-    }
-    if (!(x == one))
+  for (int i = 0; i < k; i++)
+  {
+    if (!millerRabin(d, n))
     {
       return false;
     }
   }
-  return true; // Number is prime with likelihood of (1/4)^num_tests
+
+  return true;
 }
 
 bool correctString(string temp)
@@ -1151,20 +1213,22 @@ void storeNumber(Number *n, string num)
 int main()
 {
   string num = getNumber();
-  string num2 = getNumber();
+  // string num2 = getNumber();
 
   Number n1;
   Number n2;
   Number n3;
 
   storeNumber(&n1, num);
-  storeNumber(&n2, num2);
+  // storeNumber(&n2, num2);
 
   n1.PrintList();
-  n2.PrintList();
 
-  n3 = n1 / n2;
-  n3.PrintList();
+  cout << "Is prime: " << isPrime(n1, 32);
+  // n2.PrintList();
+
+  // n3 = n1 / n2;
+  // n3.PrintList();
 
   return 0;
 }
