@@ -51,7 +51,7 @@
 
 ## GitHub Repository
 
-[Muhammad Wasif Shakeel](https://github.com/mwasifshkeel)
+[Muhammad Wasif Shakeel](https://github.com/mwasifshkeel/Assignment-01-DSA)
 (Public on 8-Oct-2024)
 
 ---
