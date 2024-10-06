@@ -426,65 +426,65 @@ public:
     return result;
   }
 
-  friend Number operator-(const Number &n1, int n2) // Subtract
+  friend Number operator-(const Number &n1, int n2) // Subtract int from Number
   {
     Number result;
-    node *temp = n1.last;
-    string n_temp = to_string(n2);
-    int len = n_temp.length();
-    int padding = n1.length - len;
+    node *temp = n1.last; // Start form last node of first number
+
+    string n_temp = to_string(n2); // Convert second number into a string
+    int len = n_temp.length();     // Find length of second number
+    int padding = n1.length - len; // Calculate padding of zeros
     string n = "";
     for (int i = 0; i < padding; i++)
     {
-      n.push_back('0');
+      n.push_back('0'); // Create a padded string
     }
-    n += n_temp;
-    int borrow = 0;
+    n += n_temp;    // Add original value to padded string
+    int borrow = 0; // Initialize borrow to zero
     string diffNode = "";
-    while (temp != nullptr)
+    while (temp != nullptr) // As long as list end is not reached
     {
-      string value = temp->data;
+      string value = temp->data; // Extract data from node
       diffNode = "";
-      while ((!value.empty()) && (!n.empty()))
+      while ((!value.empty()) && (!n.empty())) // As long as one of the strings is not empty
       {
-        int digitOne = int(value.back() - '0') - borrow;
-        int digitTwo = int(n.back() - '0');
+        int digitOne = int(value.back() - '0') - borrow; // Cast last digit of first number to int and subtract borrow
+        int digitTwo = int(n.back() - '0');              // Cast last digit of second number to int
         int digitDiff;
 
-        if (digitOne >= digitTwo)
+        if (digitOne >= digitTwo) // Check for need for borrow
         {
           digitDiff = digitOne - digitTwo;
           borrow = 0;
         }
         else
         {
-          digitDiff = digitOne + 10 - digitTwo;
+          digitDiff = digitOne + 10 - digitTwo; // Recalculate difference if borrow was attempted
           borrow = 1;
         }
-        diffNode.push_back(digitDiff + '0');
-        value.pop_back();
-        n.pop_back();
+        diffNode.push_back(digitDiff + '0'); // Push the difference into diffNode
+        value.pop_back();                    // Remove last digit of value
+        n.pop_back();                        // Remove last digit of number two
       }
-      temp = temp->prev;
-      reverse(diffNode.begin(), diffNode.end());
-      result.InsertAtFront(diffNode);
+
+      temp = temp->prev;                         // Move on to previous node
+      reverse(diffNode.begin(), diffNode.end()); // Subtraction is from right to left result is reversed string
+      result.InsertAtFront(diffNode);            // Make new node of result
     }
 
-    string data = result.GetNumber();
-    size_t TrimIndexData = data.find_first_not_of('0');
-    data = data.substr(TrimIndexData);
+    result = clean(result); // Remove leading zeros after subtraction
 
-    result.DestroyList();
-    storeNumber(&result, data);
     return result;
   }
 
-  friend bool operator==(const Number &n1, const Number &n2)
+  friend bool operator==(const Number &n1, const Number &n2) // Check if two Numbers are equal
   {
-    string numOne = n1.GetNumber();
-    bool zeroCheckOne = true, zeroCheckTwo = true;
-    string numTwo = n2.GetNumber();
-    for (int i = 0; i < numOne.length(); i++)
+    string numOne = n1.GetNumber(); // Get String representation of first number
+    string numTwo = n2.GetNumber(); // Get String representation of second number
+
+    bool zeroCheckOne = true, zeroCheckTwo = true; // Zero check variables for both numbers
+
+    for (int i = 0; i < numOne.length(); i++) // Iterate and check if non zero digit exists
     {
       if (numOne.at(i) != '0')
       {
@@ -492,7 +492,7 @@ public:
         break;
       }
     }
-    for (int i = 0; i < numTwo.length(); i++)
+    for (int i = 0; i < numTwo.length(); i++) // Iterate and check if non zero digit exists
     {
       if (numTwo.at(i) != '0')
       {
@@ -500,34 +500,37 @@ public:
         break;
       }
     }
-    if (zeroCheckOne && zeroCheckTwo)
+
+    if (zeroCheckOne && zeroCheckTwo) // If both are zero then equal
     {
       return true;
     }
-    if (zeroCheckTwo || zeroCheckOne)
+
+    if (zeroCheckTwo || zeroCheckOne) // If one is zero then not equal
     {
       return false;
     }
 
-    size_t TrimIndexNumOne = numOne.find_first_not_of('0');
-    size_t TrimIndexNumTwo = numTwo.find_first_not_of('0');
-    numOne = numOne.substr(TrimIndexNumOne);
-
-    numTwo = numTwo.substr(TrimIndexNumTwo);
+    size_t TrimIndexNumOne = numOne.find_first_not_of('0'); // Remove
+    size_t TrimIndexNumTwo = numTwo.find_first_not_of('0'); // Pading
+    numOne = numOne.substr(TrimIndexNumOne);                // Zeros
+    numTwo = numTwo.substr(TrimIndexNumTwo);                // From both Numbers
 
     if (numOne == numTwo)
     {
       return true;
     }
+
     return false;
   }
 
   friend bool
-  operator==(const Number &n1, int &n2)
+  operator==(const Number &n1, int &n2) // Check if Number is equal to int
   {
-    string num = n1.GetNumber();
-    bool zeroCheck = true;
-    for (int i = 0; i < num.length(); i++)
+    string num = n1.GetNumber(); // Get String Representation of Number
+    bool zeroCheck = true;       // Zero check variables for number
+
+    for (int i = 0; i < num.length(); i++) // Iterate and check if non zero digit exists
     {
       if (num.at(i) != '0')
       {
@@ -536,37 +539,40 @@ public:
       }
     }
 
-    if (zeroCheck && (n2 == 0))
+    if (zeroCheck && (n2 == 0)) // If both are zero then equal
     {
       return true;
     }
 
-    if (zeroCheck || (n2 == 0))
+    if (zeroCheck || (n2 == 0)) // If one is zero then not equal
     {
       return false;
     }
 
-    size_t TrimIndexNum = num.find_first_not_of('0');
-    num = num.substr(TrimIndexNum);
-    if (num == to_string(n2))
+    size_t TrimIndexNum = num.find_first_not_of('0'); // Remove
+    num = num.substr(TrimIndexNum);                   // Padding zeroes from number
+
+    if (num == to_string(n2)) // Check if numbers are equal
     {
       return true;
     }
+
     return false;
   }
 
-  friend bool operator<(const Number &n1, const Number &n2)
+  friend bool operator<(const Number &n1, const Number &n2) // Check if Number is less than Number two
   {
-    if (n1 == n2)
+    if (n1 == n2) // If they are equal then not less than
     {
       return false;
     }
 
-    string numOne = n1.GetNumber();
-    string numTwo = n2.GetNumber();
-    bool zeroCheckOne = true, zeroCheckTwo = true;
+    string numOne = n1.GetNumber(); // Get string representation of first number
+    string numTwo = n2.GetNumber(); // Get string representation of second number
 
-    for (int i = 0; i < numOne.length(); i++)
+    bool zeroCheckOne = true, zeroCheckTwo = true; // Zero check for both numbers
+
+    for (int i = 0; i < numOne.length(); i++) // Iterate and check if non zero digit exists
     {
       if (numOne.at(i) != '0')
       {
@@ -574,7 +580,7 @@ public:
         break;
       }
     }
-    for (int i = 0; i < numTwo.length(); i++)
+    for (int i = 0; i < numTwo.length(); i++) // Iterate and check if non zero digit exists
     {
       if (numTwo.at(i) != '0')
       {
@@ -582,63 +588,67 @@ public:
         break;
       }
     }
-    if (zeroCheckTwo && zeroCheckTwo)
+
+    if (zeroCheckTwo && zeroCheckTwo) // If both numbers are zero then not equal
     {
       return false;
     }
-    if (zeroCheckOne && (!zeroCheckTwo))
+    if (zeroCheckOne && (!zeroCheckTwo)) // If first number is zero and second is not then true
     {
       return true;
     }
-    if (!zeroCheckOne && zeroCheckTwo)
+    if (!zeroCheckOne && zeroCheckTwo) // If first number is non-zero and second is zero then false
     {
       return false;
     }
 
-    size_t TrimIndexNumOne = numOne.find_first_not_of('0');
-    size_t TrimIndexNumTwo = numTwo.find_first_not_of('0');
-    numOne = numOne.substr(TrimIndexNumOne);
-    numTwo = numTwo.substr(TrimIndexNumTwo);
+    size_t TrimIndexNumOne = numOne.find_first_not_of('0'); // Removing
+    size_t TrimIndexNumTwo = numTwo.find_first_not_of('0'); // Leading
+    numOne = numOne.substr(TrimIndexNumOne);                // Zeroes
+    numTwo = numTwo.substr(TrimIndexNumTwo);                // From both numbers
 
-    if (numOne.length() > numTwo.length())
+    if (numOne.length() > numTwo.length()) // If number one has more digits than number two than greater
     {
       return false;
     }
-    if (numOne.length() < numTwo.length())
+    if (numOne.length() < numTwo.length()) // If number two has less digits than number two than lesser
     {
       return true;
     }
-    for (int i = 0; i < numOne.length(); i++)
+
+    for (int i = 0; i < numOne.length(); i++) // If number two has same digits as number one
     {
-      if (int(numOne.at(i) - '0') == int(numTwo.at(i) - '0'))
+      if (int(numOne.at(i) - '0') == int(numTwo.at(i) - '0')) // If digits are same continue to next digit
       {
         continue;
       }
-      if (int(numOne.at(i) - '0') < int(numTwo.at(i) - '0'))
+      if (int(numOne.at(i) - '0') < int(numTwo.at(i) - '0')) // If first number digit is lesser than number is lesser
       {
         return true;
       }
-      else
+      else // If first number digit is greater than number is greater
       {
         return false;
       }
     }
+
     return false;
   }
 
   friend bool
-  operator<(const Number &n1, int &n2)
+  operator<(const Number &n1, int &n2) // Check if Number is less than int
   {
-    if (n1 == n2)
+    if (n1 == n2) // If both are equal then not lesser
     {
       return false;
     }
 
-    string numOne = n1.GetNumber();
-    string numTwo = to_string(n2);
-    bool zeroCheckOne = true, zeroCheckTwo = true;
+    string numOne = n1.GetNumber(); // Get String representation of first number
+    string numTwo = to_string(n2);  // Get String representation of second number
 
-    for (int i = 0; i < numOne.length(); i++)
+    bool zeroCheckOne = true, zeroCheckTwo = true; // Zero check for both numbers
+
+    for (int i = 0; i < numOne.length(); i++) // Iterate and check if non zero digit exists
     {
       if (numOne.at(i) != '0')
       {
@@ -646,7 +656,8 @@ public:
         break;
       }
     }
-    for (int i = 0; i < numTwo.length(); i++)
+
+    for (int i = 0; i < numTwo.length(); i++) // Iterate and check if non zero digit exists
     {
       if (numTwo.at(i) != '0')
       {
@@ -654,269 +665,252 @@ public:
         break;
       }
     }
-    if (zeroCheckTwo && zeroCheckTwo)
-    {
-      return false;
-    }
-    if (zeroCheckOne && (!zeroCheckTwo))
-    {
-      return true;
-    }
-    if (!zeroCheckOne && zeroCheckTwo)
+
+    if (zeroCheckTwo && zeroCheckTwo) // Both numbers are zero and equal so not lesser
     {
       return false;
     }
 
-    size_t TrimIndexNumOne = numOne.find_first_not_of('0');
-    size_t TrimIndexNumTwo = numTwo.find_first_not_of('0');
-    numOne = numOne.substr(TrimIndexNumOne);
-    numTwo = numTwo.substr(TrimIndexNumTwo);
-
-    if (numOne.length() > numTwo.length())
-    {
-      return false;
-    }
-    if (numOne.length() < numTwo.length())
+    if (zeroCheckOne && (!zeroCheckTwo)) // First number is zero and second is non-zero therefore lesser
     {
       return true;
     }
-    for (int i = 0; i < numOne.length(); i++)
+
+    if (!zeroCheckOne && zeroCheckTwo) // First number is non-zero and second is zero therefore greater
     {
-      if (int(numOne.at(i) - '0') == int(numTwo.at(i) - '0'))
+      return false;
+    }
+
+    size_t TrimIndexNumOne = numOne.find_first_not_of('0'); // Removing
+    size_t TrimIndexNumTwo = numTwo.find_first_not_of('0'); // Leading
+    numOne = numOne.substr(TrimIndexNumOne);                // Zeroes
+    numTwo = numTwo.substr(TrimIndexNumTwo);                // From Both Numbers
+
+    if (numOne.length() > numTwo.length()) // If first number has more digits it is greater
+    {
+      return false;
+    }
+
+    if (numOne.length() < numTwo.length()) // If first number has less digits it is less
+    {
+      return true;
+    }
+
+    for (int i = 0; i < numOne.length(); i++) // If both number have same digits
+    {
+      if (int(numOne.at(i) - '0') == int(numTwo.at(i) - '0')) // If both digits are equal continue to next digit
       {
         continue;
       }
-      if (int(numOne.at(i) - '0') < int(numTwo.at(i) - '0'))
+
+      if (int(numOne.at(i) - '0') < int(numTwo.at(i) - '0')) // If first digit is lesser than number is lesser
       {
         return true;
       }
-      else
+
+      else // If first digit is greater than number is greater
       {
         return false;
       }
     }
+
     return false;
   }
 
-  friend Number operator%(const Number &n1, const Number &n2)
+  friend Number operator%(const Number &n1, const Number &n2) // Number modulus Number
   {
-    int z = 0;
-    if (n1 == z)
+
+    int z = 0;   // Check
+    if (n1 == z) // If number one is zero
     {
       Number z2;
       z2.InsertAtEnd("0");
-      return z2;
+      return z2; // 0 mod X = 0
     }
 
-    if (n1 < n2)
+    if (n1 < n2) // If second number greater than first number
     {
-      return n1;
+      return n1; // n1 mod n2 = n1
     }
 
-    string numOne = n1.GetNumber();
-    string numTwo = n2.GetNumber();
-    size_t TrimIndexNumOne = numOne.find_first_not_of('0');
-    size_t TrimIndexNumTwo = numTwo.find_first_not_of('0');
-    numOne = numOne.substr(TrimIndexNumOne);
-    numTwo = numTwo.substr(TrimIndexNumTwo);
+    string numOne = n1.GetNumber(); // Get string representation of first number
+    string numTwo = n2.GetNumber(); // Get string representation of second number
+
+    size_t TrimIndexNumOne = numOne.find_first_not_of('0'); // Remove
+    size_t TrimIndexNumTwo = numTwo.find_first_not_of('0'); // Leading
+    numOne = numOne.substr(TrimIndexNumOne);                // Zeroes
+    numTwo = numTwo.substr(TrimIndexNumTwo);                // From both Numbers
+
     int lenOne = numOne.length();
     int lenTwo = numTwo.length();
-    if (numOne == numTwo)
+
+    if (numOne == numTwo) // If both numbers equal then mod is zero
     {
       Number zero;
       zero.InsertAtEnd("0");
       return zero;
     }
-    if (lenOne < lenTwo)
-    {
-      return n1;
-    }
 
     Number nTwo;
-    Number zero;
-    zero.InsertAtEnd("0");
-    storeNumber(&nTwo, numTwo);
+
+    Number zero;           // Zero
+    zero.InsertAtEnd("0"); // in Number Object
+
+    storeNumber(&nTwo, numTwo); // Store numTwo in nTwo Object
+
     string quotientNode = "";
     string data;
     string remainder = "";
-    bool firstTime = true;
-    while (!numOne.empty())
+
+    bool firstTime = true; // Check if we first iteration of division
+
+    while (!numOne.empty()) // Divide until first number becomes empty
     {
-      if (remainder == "" && firstTime)
+      if (firstTime)
       {
-        if (numOne.length() >= lenTwo)
+        if (numOne.length() >= lenTwo) // Check if first number has more or equal digits than second number
         {
-          data = numOne.substr(0, lenTwo);
-          if (numOne.length() == lenTwo)
+          data = numOne.substr(0, lenTwo); // Extract first lenTwo digits from number One
+          if (numOne.length() == lenTwo)   // If length of first number was equal to lenTwo
           {
-            numOne = "";
+            numOne = ""; // First Number is now empty
           }
           else
           {
-            numOne = numOne.substr(lenTwo, numTwo.length());
+            numOne = numOne.substr(lenTwo, numTwo.length()); // Remove first lenTwo numbers from first number
           }
         }
-        firstTime = false;
+        firstTime = false; // No longer first iteration
       }
       else
       {
-        firstTime = false;
-        data = remainder;
+        data = remainder; // Data is remainder of last division
       }
-      Number nOne;
-      storeNumber(&nOne, data);
-      if (nOne < nTwo)
+
+      Number nOne;              // Store
+      storeNumber(&nOne, data); // data in Number object
+
+      if (nOne < nTwo) // If first number is less than second number
       {
-        if (!numOne.empty())
+        if (!numOne.empty()) // If first number is not empty
         {
-          data = data + numOne.substr(0, 1);
-          nOne.DestroyList();
-          storeNumber(&nOne, data);
-          if (numOne.length() == 1)
+          data = data + numOne.substr(0, 1); // Extract next digit from first number and add it to data
+          nOne.DestroyList();                // Recreate
+          storeNumber(&nOne, data);          // the data object
+          if (numOne.length() == 1)          // If first number length was 1
           {
-            numOne = "";
+            numOne = ""; // First number is empty now
           }
           else
           {
-            numOne = numOne.substr(1, numOne.length());
+            numOne = numOne.substr(1, numOne.length()); // Otherwise remove first digit from first number
           }
         }
         else
         {
-          remainder = data;
-          goto nomore;
+          remainder = data; // If first number was empty no digit can make this number greater than second number
+          goto nomore;      // Remainder is the result of mod
         }
 
-        if (nOne < nTwo)
+        if (nOne < nTwo) // If first number is still less than second number
         {
-          while (nOne < nTwo && !numOne.empty())
+          while (nOne < nTwo && !numOne.empty()) // Append digits from first number into data until first number is empty or data becomes greater than second number
           {
-            quotientNode.push_back('0');
+            quotientNode.push_back('0'); // Append zero to extract digit
             if (numOne.length() >= 1)
             {
-              data = data + numOne.substr(0, 1);
-              nOne.DestroyList();
-              storeNumber(&nOne, data);
-              numOne = numOne.substr(1, numOne.length());
+              data = data + numOne.substr(0, 1);          // Extract digit from first number
+              nOne.DestroyList();                         // Recreate
+              storeNumber(&nOne, data);                   // the data Number Object
+              numOne = numOne.substr(1, numOne.length()); // Remove first digit from first number
             }
             else
             {
-              numOne = "";
-              remainder = data;
-              goto nomore;
+              numOne = "";      // Number is empty now
+              remainder = data; // Data is now remainder
+              goto nomore;      // Remainder is the result of mod
             }
           }
         }
       }
 
-      int multiple = 0;
-      while (!(nOne < nTwo))
+      int multiple = 0; // Count how many times it takes second number to make first number less than it
+
+      while (!(nOne < nTwo)) // Subtract second number from first number until it becomes smaller
       {
         nOne = nOne - nTwo;
         multiple++;
       }
-      quotientNode = quotientNode + to_string(multiple);
 
-      nOne = clean(nOne);
-      remainder = (nOne == zero) ? "" : nOne.GetNumber();
+      quotientNode = quotientNode + to_string(multiple); // Multiple is pushed back into quotient
+
+      nOne = clean(nOne);                                 // Remove leading zeroes from first number
+      remainder = (nOne == zero) ? "" : nOne.GetNumber(); // If first number is empty remainder was zero otherwise remainder is the first number
     }
-  nomore:
+
+  nomore: // Incase of infinite loop
+
     Number result;
-    storeNumber(&result, remainder);
+    storeNumber(&result, remainder); // Store remainder in result
+
     return result;
   }
 
-  friend Number operator%(Number &n1, int &n2)
+  friend Number operator%(Number &n1, int &n2) // Number modulus int
   {
-    int res = 0;
-    string num = n1.GetNumber();
-    for (int i = 0; i < num.length(); i++)
+    int res = 0; // Initialize result as zero
+
+    string num = n1.GetNumber(); // Get string representation of first number
+
+    for (int i = 0; i < num.length(); i++) // Find mod
     {
       res = (res * 10 + num[i] - '0') % n2;
     }
 
-    Number result;
-    result.InsertAtEnd(to_string(res));
-    return result;
-  }
-
-  friend Number pow(Number &base, Number &exp)
-  {
-    int z = 0;
-    int o = 1;
-    if (exp == z)
-    {
-      Number one;
-      one.InsertAtEnd("1");
-      return one;
-    }
-
-    if (exp == o)
-    {
-      return base;
-    }
-
-    Number result;
-    result.InsertAtEnd("1");
-
-    while (!(exp == z || exp < z))
-    {
-
-      if ((exp.GetNumber().back() - '0') % 2 == 1)
-      {
-        result = result * base;
-      }
-      base = base * base;
-      exp = exp / 2;
-    }
+    Number result;                      // Store
+    result.InsertAtEnd(to_string(res)); // res in Number object
 
     return result;
   }
 
-  friend Number pow(const Number &n1, const int &n2)
+  friend Number operator/(const Number &n1, const Number &n2) // Divide two Numbers
   {
-    Number result;
-    result.InsertAtEnd("1");
-    for (int i = 0; i < n2; i++)
-    {
-      result = result * n1;
-    }
-    result = clean(result);
-    return result;
-  }
-
-  friend Number operator/(const Number &n1, const Number &n2)
-  {
-    int z = 0;
-    if (n2 == z)
+    int z = 0;   // Initialize zero
+    if (n2 == z) // Check for division by zero
     {
       throw runtime_error("Math error: Attempted to divide by Zero\n");
       Number x;
-      return x;
+      return x; // Not reached due to exception
     }
 
-    if (n1 == z)
+    if (n1 == z) // If the numerator is zero
     {
       Number z2;
-      z2.InsertAtEnd("0");
+      z2.InsertAtEnd("0"); // Result is zero
       return z2;
     }
 
-    if (n1 < n2)
+    if (n1 < n2) // If numerator is less than denominator
     {
       Number z2;
-      z2.InsertAtEnd("0");
+      z2.InsertAtEnd("0"); // Result is zero
       return z2;
     }
 
+    // Get string representations of both numbers
     string numOne = n1.GetNumber();
     string numTwo = n2.GetNumber();
+
+    // Remove leading zeros
     size_t TrimIndexNumOne = numOne.find_first_not_of('0');
     size_t TrimIndexNumTwo = numTwo.find_first_not_of('0');
     numOne = numOne.substr(TrimIndexNumOne);
     numTwo = numTwo.substr(TrimIndexNumTwo);
+
     int lenOne = numOne.length();
     int lenTwo = numTwo.length();
+
+    // If both numbers are equal, result is 1
     if (numOne == numTwo)
     {
       Number one;
@@ -924,107 +918,117 @@ public:
       return one;
     }
 
-    Number nTwo;
+    Number nTwo; // Store the denominator
     Number zero;
-    zero.InsertAtEnd("0");
-    storeNumber(&nTwo, numTwo);
-    string quotientNode = "";
-    string data;
-    string remainder = "";
-    bool firstTime = true;
-    while (!numOne.empty())
+    zero.InsertAtEnd("0");      // Zero in Number object
+    storeNumber(&nTwo, numTwo); // Store numTwo in nTwo object
+
+    string quotientNode = ""; // To store the result of the division
+    string data;              // Holds the current segment being divided
+    string remainder = "";    // To keep track of the current remainder
+    bool firstTime = true;    // Flag to track the first iteration of division
+
+    while (!numOne.empty()) // Continue until all digits in numOne are processed
     {
+      // Handle the first iteration
       if (remainder == "" && firstTime)
       {
-        if (numOne.length() >= lenTwo)
+        if (numOne.length() >= lenTwo) // If enough digits in numOne
         {
-          data = numOne.substr(0, lenTwo);
+          data = numOne.substr(0, lenTwo); // Take first lenTwo digits
           if (numOne.length() == lenTwo)
           {
-            numOne = "";
+            numOne = ""; // numOne is now empty
           }
           else
           {
-            numOne = numOne.substr(lenTwo, numOne.length());
+            numOne = numOne.substr(lenTwo, numOne.length()); // Remove taken digits
           }
         }
-        firstTime = false;
+        firstTime = false; // Now not the first iteration
       }
       else
       {
-        firstTime = false;
-        data = remainder;
+        firstTime = false; // Ensure not the first iteration
+        data = remainder;  // Use previous remainder as current data
       }
-      Number nOne;
-      storeNumber(&nOne, data);
-      if (nOne < nTwo)
+
+      Number nOne;              // To store the current segment
+      storeNumber(&nOne, data); // Store data in nOne
+
+      if (nOne < nTwo) // If current segment is less than n2
       {
-        if (!numOne.empty())
+        if (!numOne.empty()) // If there are still digits in numOne
         {
-          data = data + numOne.substr(0, 1);
-          nOne.DestroyList();
-          storeNumber(&nOne, data);
+          data = data + numOne.substr(0, 1); // Append next digit to data
+          nOne.DestroyList();                // Clean up nOne
+          storeNumber(&nOne, data);          // Update nOne with new data
           if (numOne.length() == 1)
           {
-            numOne = "";
+            numOne = ""; // numOne is now empty
           }
           else
           {
-            numOne = numOne.substr(1, numOne.length());
+            numOne = numOne.substr(1, numOne.length()); // Remove first digit
           }
         }
         else
         {
-          remainder = data;
-          goto nomore2;
+          remainder = data; // No more digits, this is the remainder
+          goto nomore2;     // Exit loop
         }
 
+        // Keep appending digits from numOne until nOne is no longer less than nTwo
         if (nOne < nTwo)
         {
           while (nOne < nTwo && !numOne.empty())
           {
-            quotientNode.push_back('0');
+            quotientNode.push_back('0'); // Append zero to quotient
             if (numOne.length() >= 1)
             {
-              data = data + numOne.substr(0, 1);
-              nOne.DestroyList();
-              storeNumber(&nOne, data);
-              numOne = numOne.substr(1, numOne.length());
+              data = data + numOne.substr(0, 1);          // Add next digit from numOne
+              nOne.DestroyList();                         // Clean up nOne
+              storeNumber(&nOne, data);                   // Update nOne
+              numOne = numOne.substr(1, numOne.length()); // Remove first digit
             }
             else
             {
-              numOne = "";
-              remainder = data;
-              goto nomore2;
+              numOne = "";      // numOne is now empty
+              remainder = data; // Remainder is current data
+              goto nomore2;     // Exit loop
             }
           }
         }
       }
 
-      int multiple = 0;
-      while (!(nOne < nTwo))
+      int multiple = 0;      // Count how many times n2 can be subtracted from n1
+      while (!(nOne < nTwo)) // Keep subtracting nTwo from nOne
       {
-        nOne = nOne - nTwo;
-        multiple++;
+        nOne = nOne - nTwo; // Subtract
+        multiple++;         // Increment count
       }
-      quotientNode = quotientNode + to_string(multiple);
 
-      nOne = clean(nOne);
-      remainder = (nOne == zero) ? "" : nOne.GetNumber();
+      quotientNode = quotientNode + to_string(multiple); // Add count to quotient
+
+      nOne = clean(nOne);                                 // Remove leading zeros from nOne
+      remainder = (nOne == zero) ? "" : nOne.GetNumber(); // Determine remainder
     }
-  nomore2:
+
+  nomore2: // End of division processing
+
     Number result;
-    storeNumber(&result, quotientNode);
-    return result;
+    storeNumber(&result, quotientNode); // Store the quotient in result
+
+    return result; // Return the result of the division
   }
 
-  friend Number operator/(const Number &n1, const int &n2)
+  friend Number operator/(const Number &n1, const int &n2) // Divide number by int
   {
     Number n2T;
-    string n2I = to_string(n2);
-    storeNumber(&n2T, n2I);
+    string n2I = to_string(n2); // Convert int to a string
+    storeNumber(&n2T, n2I);     // Store number in a Number class object
 
-    Number result = n1 / n2T;
+    Number result = n1 / n2T; // Proceed with Number-Number division
 
     return result;
   }
@@ -1057,88 +1061,101 @@ Number modpow(Number numOne, Number numTwo, Number mod) // Compute a^b % mod
   return result;
 }
 
-bool millerRabin(Number d, Number n)
+bool millerRabin(Number d, Number n) // Miller-Rabin primality test
 {
-  int one = 1;          // Initialize
-  Number two;           // Common
-  two.InsertAtEnd("2"); // Digits
+  int one = 1;          // Initialize variable for comparison
+  Number two;           // Common base for calculations
+  two.InsertAtEnd("2"); // Set base to 2
 
-  Number rand;                             // Store random number
-  rand.InsertAtEnd(to_string(distr(eng))); // Generate random number and store it in rand
+  // Generate a random number between 2 and n-2
+  Number rand;
+  rand.InsertAtEnd(to_string(distr(eng))); // Generate random number
 
-  Number temp2 = n - 4;
-  Number temp = (rand % temp2);
-  Number a = two + temp;
-  Number x = modpow(a, d, n);
+  Number temp2 = n - 4;         // Set upper limit for random number
+  Number temp = (rand % temp2); // Ensure the random number is within the limit
+  Number a = two + temp;        // a = random number + 2
+  Number x = modpow(a, d, n);   // Calculate a^d mod n
 
+  // Check if x is either 1 or n-1
   if ((x == one) || (x == (n - 1)))
   {
-    return true;
+    return true; // Passes the test
   }
+
+  // Iteratively check for non-trivial roots of unity
   while (!(d == (n - 1)))
   {
-    x = (x * x) % n;
-    d = d * 2;
+    x = (x * x) % n; // Square x and reduce mod n
+    d = d * 2;       // Double d
     if (x == one)
     {
-      return false;
+      return false; // Composite number
     }
     if (x == (n - 1))
     {
-      return true;
+      return true; // Passes the test
     }
   }
-  return false;
+  return false; // Composite number
 }
 
-bool isPrime(Number n, int k)
+bool isPrime(Number n, int k) // Function to check if n is prime
 {
   int four = 4;
   int one = 1;
   int three = 3;
+
+  // Handle small values and known non-primes
   if (((n < one) || (n == one)) || (n == four))
   {
-    return false;
+    return false; // 0, 1, and 4 are not prime
   }
   if (n < three || n == three)
   {
-    return true;
+    return true; // 2 and 3 are prime
   }
+
+  // Check for divisibility by 3
   string *num = new string;
   *num = n.GetNumber();
   int result = 0;
+
   for (int i = 0; i < (*num).length(); i++)
   {
-    result = result + int((*num).at(i) - '0');
+    result += int((*num).at(i) - '0'); // Sum of digits
   }
-  delete num;
+
+  delete num; // Free allocated memory
+
   if (result % 3 == 0)
   {
-    return false;
+    return false; // Divisible by 3
   }
 
-  int test = int(n.GetNumber().back() - '0');
-
+  // Check for even numbers and multiples of 5
+  int test = int(n.GetNumber().back() - '0'); // Last digit
   if (test % 2 == 0 || test == 0 || test == 5)
   {
-    return false;
+    return false; // Not prime
   }
 
+  // Write n-1 as d * 2^r
   Number d = n - 1;
   while ((int(d.GetNumber().back() - '0') % 2) == 0)
   {
-    d = (d / 2);
+    d = (d / 2); // Divide d by 2
   }
 
+  // Perform Miller-Rabin test k times
   for (int i = 0; i < k; i++)
   {
     if (!millerRabin(d, n))
     {
-      return false;
+      return false; // Composite number
     }
   }
 
-  return true;
+  return true; // n is likely prime
 }
 
 bool correctString(string temp) // Checks if user input was a number only
